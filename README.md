@@ -6,7 +6,6 @@
 
 ```
 Schema::create('orders', function (Blueprint $table) {
-Schema::create('orders', function (Blueprint $table) {
     $table->increments('id')->index();
     $table->integer('user_id');
     $table->string('order_no')->unique();
