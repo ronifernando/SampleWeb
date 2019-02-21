@@ -67,7 +67,7 @@ class OrderController extends BaseController
                         ->orWhere(function ($query) use ($data) {
                             //9-17
                             $time = date('G', time());
-                            $paid = $this->successrate($time);
+                            $paid = $this->successchance($time);
 
                             $query->where('order_no', $data)
                                     ->where('product_type', 1)
@@ -95,12 +95,12 @@ class OrderController extends BaseController
         return $result;
     }
 
-    public function successrate($goodtime) {
+    public function successchance($goodtime) {
         
         $result = mt_rand(0, 100);
 
         if($goodtime>=9 && $goodtime<=17){
-            if($result<=40)
+            if($result<=90)
                 return 1;
             else
                 return 2;

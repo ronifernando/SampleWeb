@@ -25,10 +25,10 @@ Schema::create('orders', function (Blueprint $table) {
 - I use Topup Balance payment with a 90% chance of success at 9AM-5PM and 40% 
 otherwise (thi is not a success rate algorithm, but this is a probability algorithm)
 ```
-public function successrate($time) {  
+public function successchance($time) {  
     $result = mt_rand(0, 100);
     if($time>=9 && $time<=17){
-        if($result<=40)
+        if($result<=90)
             return 1;
         else
             return 2;
