@@ -2,24 +2,30 @@
 
 ## Laravel 5.7
 
-- Single Table Order
-
+- Use Three Table with Morph Relation
+  * Product Table to store product detail
+  * Prepaid Table to store prepaid detail
+  * Order Table to store order detail
 ```
-Schema::create('orders', function (Blueprint $table) {
-    $table->increments('id')->index();
-    $table->integer('user_id');
-    $table->string('order_no')->unique();
-    $table->string('product_name')->default('-');
-    $table->string('address')->default('-');
-    $table->string('shipping_code')->default('-');
-    $table->string('mobile_number')->default('-');
-    $table->string('price')->default('-');
-    $table->integer('product_type'); //1 is prepaid ------- 0 is product
-    // $table->morphs('product'); //if use polymorphism
-    $table->integer('paidstatus')->default(0); //1 is paid  //2 fail //3 is cancel
-    $table->timestamp('paid_at')->nullable();
-    $table->timestamps();
-});
+    products
+        id
+        product_name
+        shipping_address
+    
+    prepaids
+        id
+        mobile_number
+        value
+
+    orders
+        id
+        user_id
+        order_no
+        total_price
+        shiiping_code
+        paidstatus
+        orderable_id
+        orderable_type
 ``` 
 ----------
 - I use Topup Balance payment with a 90% chance of success at 9AM-5PM and 40% 

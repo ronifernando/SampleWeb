@@ -17,16 +17,12 @@ class CreateOrdersTable extends Migration
             $table->increments('id')->index();
             $table->integer('user_id');
             $table->string('order_no')->unique();
-            $table->string('product_name')->default('-');
-            $table->string('address')->default('-');
-            $table->string('shipping_code')->default('-');
-            $table->string('mobile_number')->default('-');
-            $table->string('price')->default('-');
-            $table->integer('product_type');//1 is prepaid ------- 0 is product
-            // $table->morphs('product');
-            $table->integer('paidstatus')->default(0); //1 is paid  //2 fail //3 is cancel
-            $table->timestamp('paid_at')->nullable();
+            $table->string('total_price');
+            $table->string('shipping_code')->nullable();
+            $table->morphs('orderable');
+            $table->integer('paidstatus')->default(0); //1 success  //2 fail //3 is cancel
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -39,16 +39,17 @@
                           <tr>
 
                             <td>
-                                {{$item->order_no}}   Rp {{$item->price}}
+                                
+                                {{$item->order_no}}   Rp {{$item->total_price}}
                                 <br>
-                                @if($item->product_type==1)
-                                    {{$item->price * 100 / (100+5)}} for {{$item->mobile_number}}
+                                @if($item->orderable_type=="App\Prepaid")
+                                    {{$item->orderable->value}} for {{$item->orderable->mobile_number}}
                                 @else
-                                    {{$item->product_name}} that costs {{$item->price}}
+                                    {{$item->orderable->product_name}} that costs {{$item->orderable->price}}
                                 @endif
                             </td>
                             <td class="text-center">
-                                @if($item->product_type==1)
+                                @if($item->orderable_type=="App\Prepaid")
                                     @switch($item->paidstatus)
                                         @case(1)
                                             <p class="text-success">Success</p>

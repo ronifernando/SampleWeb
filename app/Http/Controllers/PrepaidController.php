@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\DB;
 use Auth;
 use App\Order;
+use App\Prepaid;
 
 class PrepaidController extends BaseController
 {
@@ -23,20 +25,31 @@ class PrepaidController extends BaseController
             'phonenumber' => ['required', "regex:$phoneRegex"],
             'price' => ['required','numeric','in:10000,50000,100000'],
         ]);
+        
+        $array = DB::transaction(function(){
+            $prepaid = new Prepaid;
+            $prepaid->mobile_number = $phonenumber = Input::get('phonenumber');
+            $prepaid->value = $value = Input::get('price');
+            $prepaid->save();
+            
+            do{$rand =  $this->randomNumber(10);}while(!empty(Order::where('order_no',$rand)->first()));
 
-        $order = new Order;
+            $order = new Order;
+            $order->user_id= Auth::user()->id;
+            $order->order_no = $rand;
+            $order->total_price = $total_price = Input::get('price') + (Input::get('price')*0.05);
+ 
+            $save= Prepaid::find($prepaid->id);
+            $status = $save->orders()->save($order);
 
-        do{$rand = $this->randomNumber(10);}while(!empty(Order::where('order_no',$rand)->first()));
-
-        $order->user_id= Auth::user()->id;
-        $order->order_no = $rand;
-        $order->mobile_number = $phonenumber = Input::get('phonenumber');
-        $order->price = $price = Input::get('price') + (Input::get('price')*0.05);
-        $order->product_type = 1;
-        $order->save();
-
+            if( !$status )
+            {
+                throw new \Exception('Failed to create order');
+            }
+            return compact('rand', 'phonenumber', 'total_price', 'value');
+        });        
         return redirect('success')
-                        ->with('status', [$rand,$phonenumber,$price]);
+                        ->with('status', [$array['rand'],$array['phonenumber'],$array['total_price']]);
     }
 
     public function randomNumber($length) {

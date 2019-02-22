@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Input;
 use App\Jobs\CancelJob;
 use Auth;
 use App\Order;
+use App\Product;
+use App\Prepaid;
 use Session;
 
 class OrderController extends BaseController
 {
     public function index()
     {
-        $data = Order::where('user_id', Auth::user()->id)->orderBy('created_at', 'DSC')->paginate(20);
+        $data = Order::getOrder(Auth::user()->id)->paginate(20);
         return view('orders.orderhistory', compact(['data']));
     }
 
@@ -32,7 +34,6 @@ class OrderController extends BaseController
         $data = Session::get( 'status' );
 
         if(isset($data)){
-            // echo dd($data[0]);
             CancelJob::dispatch($data[0])->delay(now()->addMinutes(5));
             return view('orders.success', compact(['data']));
         }
@@ -52,29 +53,9 @@ class OrderController extends BaseController
         
         if(isset($data)){
 
-            if(!empty(Order::where('order_no',$data)
-                            ->where('user_id', Auth::user()->id)
-                            ->where('paidstatus', 0)
-                            ->first())){
-                do{$rand = $this->randomNumber(8);}while(!empty(Order::where('shipping_code',$rand)->first()));
-                Order::where(function ($query) use ($rand,$data){
-                            $query->where('order_no', $data)
-                                    ->where('product_type', 0)
-                                    ->update([
-                                        'paidstatus' => 1,
-                                        'shipping_code' => $rand
-                                    ]);})
-                        ->orWhere(function ($query) use ($data) {
-                            //9-17
-                            $time = date('G', time());
-                            $paid = $this->successchance($time);
-
-                            $query->where('order_no', $data)
-                                    ->where('product_type', 1)
-                                    ->update([
-                                        'paidstatus' => $paid
-                                    ]);
-                                });
+            if(!empty(Order::checkUser($data, Auth::user()->id)->first())){
+                do{$rand = $this->randomNumber(8);}while(!empty(Order::checkShippingCode($rand)));
+                Order::changePaidstatus($rand, $data);
                 
                 return redirect('orders');
             }else{
